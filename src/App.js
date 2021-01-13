@@ -1,23 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
+import { CssBaseline, Tab, Tabs, AppBar, Container, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import BottomAppBar from "./components/BottomAppBar";
 
 function App() {
+  // state variables
+  const [currentTab, setCurrentTab] = useState(0);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <CssBaseline />
+      <Container>
+        <div role="tabpanel" hidden={currentTab !== 0}>
+        <Typography variant="h3" align="center" style={{ margin: 8 }}>
+          Here will prolly by the timer
+        </Typography>
+        </div>
+        <div role="tabpanel" hidden={currentTab !== 1}>
+        <Typography variant="h3" align="center" style={{ margin: 8 }}>
+          Hi
+        </Typography>
+        </div>
+        <BottomAppBar setCurrentTab={setCurrentTab} currentTab={currentTab} />
+      </Container>
     </div>
   );
 }
