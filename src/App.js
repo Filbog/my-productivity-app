@@ -6,6 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 //Components
 import BottomAppBar from "./components/BottomAppBar";
 import Timer from './components/Timer';
+import ActionsForm from './components/ActionsForm';
 
 function App() {
 
@@ -20,6 +21,8 @@ function App() {
     //did minutes and hours as well, but I don't know if I'll use them.
   const [minutes, setMinutes] = useState(0);
   const [hours, setHours] = useState(0);
+    //actions
+  const [actions, setActions] = useState([]);
   
 
   return (
@@ -28,6 +31,7 @@ function App() {
       <Container>
         <div role="tabpanel" hidden={currentTab !== 0}>
           <Timer seconds={seconds} setSeconds={setSeconds} status={status} setStatus={setStatus} />
+          <ActionsForm actions={actions} setActions={setActions} />
         </div>
         <div role="tabpanel" hidden={currentTab !== 1}>
         <Typography variant="h3" align="center" style={{ margin: 8 }}>
