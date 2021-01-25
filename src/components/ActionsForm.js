@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, Fragment } from "react";
 import {
   Select,
   FormControl,
@@ -7,12 +7,42 @@ import {
   InputLabel,
   Fab,
   TextField,
-  FormHelperText
+  FormHelperText,
 } from "@material-ui/core";
 
-import AddIcon from "@material-ui/icons/Add";
+import styled from "styled-components";
+//uuid for generating random IDs
+import { v4 as uuidv4 } from 'uuid';
 
-function ActionsForm({ actions, setActions }) {
+import AddIcon from "@material-ui/icons/Add";
+// const MyFab = styled(Fab)`
+//   background-color: ${props => props.disabled && '#e91e63 !important'};
+// `;
+
+const StyledActionForm = styled.div`
+  display: ${props => props.hidden === true ? 'hidden' : 'flex'};
+  flex-direction: column;
+  align-items: center;
+
+`;
+
+const StyledFormControl = styled(FormControl)`
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  & > * {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+`
+
+const StyledSelect = styled(Select)`
+  width: 100%;
+`
+
+function ActionsForm({ actions, setActions, timerMode, setCurrentAction, currentAction }) {
   //controling the opening of our select. I control the text field with ref and focus
   const [openSelect, setOpenSelect] = useState(false);
   //With this I'll set the action to be connected to the timer
@@ -21,10 +51,12 @@ function ActionsForm({ actions, setActions }) {
   //errors
   const [selectErrors, setSelectErrors] = useState(false);
   const [textFieldErrors, setTextFieldErrors] = useState(false);
-
+  const textFieldErrorsContent = {empty: 'this field cannot be empty', tooManyChars: 'maximum number of characters is 40'}
+  //toggler showing Fab either for select or text field
+  const [toggleFabs, setToggleFabs] = useState(true);
+  
   const handleOpenSelect = () => {
     setOpenSelect(true);
-
   };
 
   const handleCloseSelect = () => {
@@ -33,30 +65,43 @@ function ActionsForm({ actions, setActions }) {
 
   const handleSelectChange = (event) => {
     setSelectAction(event.target.value);
-    setSelectErrors(false)
+    setSelectErrors(false);
+    setToggleFabs(true);
   };
 
   const handleTextFieldChange = (event) => {
     setTextFieldAction(event.target.value);
-    setTextFieldErrors(false)
+    setTextFieldErrors(false);
+    setToggleFabs(false)
   };
 
   const handleSelectSubmit = (event) => {
     console.log(selectAction);
-    if(selectAction === '') {
-        setSelectErrors(true)
+    if (selectAction === "") {
+      setSelectErrors(true);
     } else {
-        setSelectAction('');
+      let selectedIndex = actions.findIndex(el => el.text === selectAction);
+      setCurrentAction(actions[selectedIndex]);
+      setSelectAction("");
+
     }
   };
   const handleTextFieldSubmit = (event) => {
     console.log(textFieldAction);
-    if(textFieldAction.replace(/\s/g, '') === '') {
-        setTextFieldErrors(true);
-        setTextFieldAction('');
+    if (textFieldAction.replace(/\s/g, "") === "") {
+      setTextFieldErrors(1);
+      setTextFieldAction("");
+    } else if(textFieldAction.length > 40) {
+      setTextFieldErrors(2);
     } else {
-        setActions([...actions, textFieldAction]);
-        setTextFieldAction('');
+      //if no errors, creating a new action
+      const newAction = {text: textFieldAction, id: uuidv4(), length: 0};
+      //adding it to the existing array
+      setActions([...actions, newAction]);
+      //setting it as a current action in the timer
+      setCurrentAction(newAction);
+      //clearing the field
+      setTextFieldAction("");
     }
   };
 
@@ -68,21 +113,21 @@ function ActionsForm({ actions, setActions }) {
   let textInput = useRef(null);
 
   return (
-    <div>
+    <StyledActionForm hidden={timerMode}>
       {/* the button is outside of the form because for whatever reason, it messes up the inputLabel */}
-      <Button onClick={handleOpenSelect}>Select an action</Button>
-      {/* this style to be deleted later */}
-        <FormControl onSubmit={handleSelectSubmit} style={{ width: "70%" }}>
+      <Button onClick={() => {handleOpenSelect(); setToggleFabs(true)}}>Select existing action</Button>
+     <Fragment>
+      <StyledFormControl onSubmit={handleSelectSubmit}>
         {/* ----------------------------- select section ----------------------------- */}
 
         <InputLabel id="demo-simple-select-filled-label">
-          Pick an existing action...
+          Pick an action...
         </InputLabel>
-        <Select
+        <StyledSelect
           open={openSelect}
           value={selectAction}
           onClose={handleCloseSelect}
-          onOpen={handleOpenSelect}
+          onOpen={() => {handleOpenSelect(); setToggleFabs(true)}}
           onChange={handleSelectChange}
           variant="filled"
           error={selectErrors}
@@ -91,38 +136,51 @@ function ActionsForm({ actions, setActions }) {
           <MenuItem value="" disabled>
             <em>None</em>
           </MenuItem>
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
-        </Select>
-        {selectErrors && <FormHelperText>this field cannot be empty</FormHelperText>}
-        <Fab type="submit" aria-label="add" onClick={handleSelectSubmit}>
+          {actions.map(action => (
+            <MenuItem value={action.text} key={action.id}>{action.text}</MenuItem>
+          ))}
+        </StyledSelect>
+        {selectErrors && (
+          <FormHelperText>this field cannot be empty</FormHelperText>
+        )}
+        <Fab
+          type="submit"
+          aria-label="add"
+          color="secondary"
+          onClick={handleSelectSubmit}
+          disabled={!toggleFabs}
+          size={!toggleFabs ? 'small' : 'large'}
+        >
           <AddIcon fontSize="large" />
         </Fab>
-      </FormControl>
-
-
+      </StyledFormControl>
+      </Fragment>
       {/* -------------------------- end of select section, start of text field section ------------------------- */}
-      <Button onClick={() => handleOpenTextField()}>Or create a new one</Button>
-      <FormControl
-        style={{ width: "70%" }}
-        onSubmit={handleTextFieldSubmit}
-      >
+      <Button onClick={() => {handleOpenTextField(); setToggleFabs(false)}}>Or create a new one</Button>
+      <StyledFormControl onSubmit={handleTextFieldSubmit}>
         <TextField
           label="create a new action"
           variant="filled"
           inputRef={textInput}
           id="textfield"
-          helperText={textFieldErrors && "this field cannot be empty"}
+          helperText={textFieldErrors && (textFieldErrors === 1 ? textFieldErrorsContent.empty : textFieldErrorsContent.tooManyChars)}
           onChange={handleTextFieldChange}
+          onClick={() => setToggleFabs(false)}
           error={textFieldErrors}
           value={textFieldAction}
         />
-        <Fab type="submit" aria-label="add" onClick={handleTextFieldSubmit}>
+        <Fab
+          type="submit"
+          aria-label="add"
+          onClick={handleTextFieldSubmit}
+          color="secondary"
+          disabled={toggleFabs}
+          size={toggleFabs ? 'small' : 'large'}
+        >
           <AddIcon fontSize="large" />
         </Fab>
-      </FormControl>
-    </div>
+      </StyledFormControl>
+    </StyledActionForm>
   );
 }
 
