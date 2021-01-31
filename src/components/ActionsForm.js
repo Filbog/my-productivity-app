@@ -51,7 +51,7 @@ function ActionsForm({ actions, setActions, timerMode, setCurrentAction, current
   //errors
   const [selectErrors, setSelectErrors] = useState(false);
   const [textFieldErrors, setTextFieldErrors] = useState(false);
-  const textFieldErrorsContent = {empty: 'this field cannot be empty', tooManyChars: 'maximum number of characters is 40'}
+  const textFieldErrorsContent = {empty: 'this field cannot be empty', tooManyChars: 'maximum number of characters is 40', alreadyExists: 'this action already exists!'}
   //toggler showing Fab either for select or text field
   const [toggleFabs, setToggleFabs] = useState(true);
   
@@ -88,14 +88,19 @@ function ActionsForm({ actions, setActions, timerMode, setCurrentAction, current
   };
   const handleTextFieldSubmit = (event) => {
     console.log(textFieldAction);
+    //if it's empty
     if (textFieldAction.replace(/\s/g, "") === "") {
       setTextFieldErrors(1);
       setTextFieldAction("");
+      //if it's too long
     } else if(textFieldAction.length > 40) {
       setTextFieldErrors(2);
+       //if what we've introduced in the textfield matches an existing action
+    } else if(actions.find(action => action.text.replace(/\s/g, "").toLowerCase() === textFieldAction.replace(/\s/g, "").toLowerCase())){
+      setTextFieldErrors(3);
     } else {
       //if no errors, creating a new action
-      const newAction = {text: textFieldAction, id: uuidv4(), length: 0};
+      const newAction = {text: textFieldAction, id: uuidv4(), lengthInSecs: 0};
       //adding it to the existing array
       setActions([...actions, newAction]);
       //setting it as a current action in the timer
@@ -163,7 +168,7 @@ function ActionsForm({ actions, setActions, timerMode, setCurrentAction, current
           variant="filled"
           inputRef={textInput}
           id="textfield"
-          helperText={textFieldErrors && (textFieldErrors === 1 ? textFieldErrorsContent.empty : textFieldErrorsContent.tooManyChars)}
+          helperText={textFieldErrors && (textFieldErrors === 1 ? textFieldErrorsContent.empty : textFieldErrors === 2 ? textFieldErrorsContent.tooManyChars : textFieldErrorsContent.alreadyExists)}
           onChange={handleTextFieldChange}
           onClick={() => setToggleFabs(false)}
           error={textFieldErrors}

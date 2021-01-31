@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import "./App.css";
 // MUI stuff
-import { CssBaseline, Tab, Tabs, AppBar, Container, Typography } from "@material-ui/core";
+import { CssBaseline, Container, Typography } from "@material-ui/core";
 //makeStyles is for modifying components MUI-style, dunno if I'll be using it honestly
-import { makeStyles } from "@material-ui/core/styles";
+// import { makeStyles } from "@material-ui/core/styles";
 //this is to make styled-components styling more specific than the native MUI one
 import { StylesProvider } from '@material-ui/core/styles';
 //Components
 import BottomAppBar from "./components/BottomAppBar";
 import Timer from './components/Timer/Timer';
 import ActionsForm from './components/ActionsForm';
+import ActionsStats from './components/Stats/ActionsStats';
+import HelperText from './components/Stats/HelperText';
 
 function App() {
 
@@ -23,9 +25,9 @@ function App() {
   const [timerMode, setTimerMode] = useState(false);
   const [seconds, setSeconds] = useState(0);
     //did minutes and hours as well, but I don't know if I'll use them.
-  const [minutes, setMinutes] = useState(0);
-  const [hours, setHours] = useState(0);
-    //all actions
+  // const [minutes, setMinutes] = useState(0);
+  // const [hours, setHours] = useState(0);
+  //actions
   const [actions, setActions] = useState([]);
   const [currentAction, setCurrentAction] = useState(null);
   
@@ -46,10 +48,14 @@ function App() {
 {/* ------------------------------- second tab ------------------------------- */}
 
         <div role="tabpanel" hidden={currentTab !== 1}>
-        <Typography variant="h3" align="center" style={{ margin: 8 }}>
-          Hi
+        <Typography variant="h3" align="center" style={{ margin: 8, marginBottom: '2rem' }}>
+          My statistics
         </Typography>
+          <ActionsStats actions={actions} setActions={setActions} />
+          <HelperText />
         </div>
+
+
         <BottomAppBar setCurrentTab={setCurrentTab} currentTab={currentTab} />
       </Container>
       </StylesProvider>

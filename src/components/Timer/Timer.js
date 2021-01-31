@@ -40,7 +40,6 @@ function Timer({ seconds, setSeconds, status, setStatus, timerMode, setTimerMode
     let actionsCopy = [...actions];
     const updatedActionIndex = actions.findIndex( el => el.id === updatedAction.id);
     actionsCopy[updatedActionIndex] = updatedAction;
-    console.log(actionsCopy);
     setActions(actionsCopy);
   }
 
@@ -48,7 +47,7 @@ function Timer({ seconds, setSeconds, status, setStatus, timerMode, setTimerMode
     setStatus(false);
     console.log(seconds);
     setTimerMode(false);
-    setCurrentAction({...currentAction, length: (currentAction.length + seconds)});
+    setCurrentAction({...currentAction, lengthInSecs: (currentAction.lengthInSecs + seconds)});
     setSeconds(0);
   };
   //because useState kind of updates the value after re-render or sth? I had to use useEffect for updating my actions array
